@@ -12,25 +12,32 @@ const BUSSTOP_URL = "https://arrivelah2.busrouter.sg/?id=83139";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const [displayTime, setDisplayTime] = useState("");
 
   useEffect(() => {
-    console.log("lalalala");
     loadBusstopData();
+
+    const interval= setInterval(loadBusstopData, 1000)
   }, []);
 
   async function loadBusstopData() {
+    setLoading(true);
     const response = await fetch(BUSSTOP_URL);
     const responseData = await response.json();
-    console.log(responseData);
+    const busData = responseData.services.filter(
+      (service) => service.no === "155"
+    )[0];
+    setDisplayTime(busData.next.duration_ms/1000);
+    setLoading(false);
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bus arrival time:</Text>
       <Text style={styles.time}>
-        {loading ? <ActivityIndicator size="large" /> : "Loaded"}
+        {loading ? <ActivityIndicator size="large" /> : displayTime} seconds
       </Text>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity onPress={loadBusstopData} style={styles.button}>
         <Text style={styles.buttonText}>Refresh!</Text>
       </TouchableOpacity>
       <StatusBar style="auto" />
